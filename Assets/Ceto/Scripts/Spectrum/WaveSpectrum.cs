@@ -27,6 +27,7 @@ namespace Ceto
 	[AddComponentMenu("Ceto/Components/WaveSpectrum")]
 	[DisallowMultipleComponent]
 	[RequireComponent(typeof(Ocean))]
+
 	public class WaveSpectrum : OceanComponent
 	{
 
@@ -42,8 +43,8 @@ namespace Ceto
         public const float MAX_CHOPPYNESS = 1.2f;
 		public const float MAX_FOAM_AMOUNT = 6.0f;
 		public const float MAX_FOAM_COVERAGE = 0.5f;
-		public const float MAX_WIND_SPEED = 30.0f;
-		public const float MIN_WAVE_AGE = 0.5f;
+		public const float MAX_WIND_SPEED = 100.0f;
+		public const float MIN_WAVE_AGE = 0.1f;
 		public const float MAX_WAVE_AGE = 1.0f;
 		public const float MAX_WAVE_SPEED = 10.0f;
 		public const float MIN_GRID_SCALE = 0.1f;
@@ -158,7 +159,7 @@ namespace Ceto
 		/// Helps remove aliasing issues.
 		/// </summary>
 		[Range(MIN_SLOPE_SMOOTHING, MAX_SLOPE_SMOOTHING)]
-		/*public*/ float slopeSmoothing = 1.0f;
+		public float slopeSmoothing = 1.0f;
 
 		/// <summary>
 		/// Scales the derivative when sampling the foam maps
@@ -1058,7 +1059,7 @@ namespace Ceto
 		{
 
             int size = m_bufferSettings.size;
-			int aniso = 9;
+			int aniso = 16;
 
 			//Must be float as some ATI cards will not render 
 			//these textures correctly if format is half.

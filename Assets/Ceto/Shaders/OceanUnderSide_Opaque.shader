@@ -11,7 +11,7 @@ Shader "Ceto/OceanUnderSide_Opaque"
 		Tags { "OceanMask"="Ceto_ProjectedGrid_Under" "RenderType"="Ceto_ProjectedGrid_Under" "IgnoreProjector"="True" "Queue"="AlphaTest+49" }
 		LOD 200
 		
-		GrabPass { "Ceto_RefractionGrab" }
+		//GrabPass { "Ceto_RefractionGrab" }
 		
 		zwrite on
 		//cull front

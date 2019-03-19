@@ -633,7 +633,6 @@ namespace Ceto
         /// </summary>
 		public void RenderOceanDepth(GameObject go)
         {
-
 			try
 			{
 

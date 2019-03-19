@@ -157,6 +157,7 @@ float2 Ceto_CausticDistortion;
 //////////////////////////////////////////////////////////
 
 sampler2D Ceto_OceanMask0, Ceto_OceanMask1;
+samplerCUBE _NewCeto_DirectionSkyMap; 
 
 #define EMPTY_MASK 0.0
 

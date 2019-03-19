@@ -91,8 +91,7 @@ void OceanSurfTop(Input IN, inout SurfaceOutputOcean o)
 		if(dot(view, norm2) < 0.0) norm2 = reflect(norm2, view);
 		if(dot(view, norm3) < 0.0) norm3 = reflect(norm3, view);
 
-	#else
-
+	#else 
 		//If 2 or 1 grid is being use just use one normal
 		//It then needs to be applied to norm1, nor2 and norm3.
 		half3 norm;
@@ -105,9 +104,12 @@ void OceanSurfTop(Input IN, inout SurfaceOutputOcean o)
 		norm3 = norm;
 
 	#endif
-	
-	fixed3 sky = ReflectionColor(norm2, screenUV.xy);
-
+	#ifdef NEW_CETO_CUBEMAP_REFLECTIONS
+		half3 reflectVector = reflect(view, norm2);
+		fixed3 sky = CubeReflectionColor(reflectVector); 
+	#else
+		fixed3 sky = ReflectionColor(norm2, screenUV.xy);
+	#endif
 	float4 disortionUV = DisortScreenUV(norm2, screenUV, depth, dist, view);
 
 	float3 worldDepthPos = WorldDepthPos(disortionUV.xy);

@@ -69,6 +69,10 @@ fixed3 ReflectionColor(half3 N, half2 reflectUV)
 	return col;
 }
 
+fixed3 CubeReflectionColor(half3 reflectionVector) {
+	return texCUBE(_NewCeto_DirectionSkyMap, reflectionVector);
+}
+
 half Lambda(half cosTheta, half sigma) 
 {
 	half v = cosTheta / sqrt((1.0 - cosTheta * cosTheta) * (2.0 * sigma));
@@ -198,7 +202,7 @@ inline fixed4 LightingOceanBRDF(SurfaceOutputOcean s, half3 viewDir, UnityGI gi)
 
 	c.a = s.Alpha;
 
-	c.rgb = lerp(c.rgb, s.Albedo, s.LightMask);
+	//c.rgb = lerp(c.rgb, s.Albedo, s.LightMask);
 
 	return c;
 }

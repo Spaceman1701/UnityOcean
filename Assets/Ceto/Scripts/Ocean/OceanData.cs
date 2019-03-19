@@ -101,7 +101,7 @@ namespace Ceto
         public float scale;
 
         //Adjust the intensity of the final color.
-        [Range(0.0f, 10.0f)]
+        [Range(0.0f, 100.0f)]
         public float intensity;
 
         //Tint the final color.

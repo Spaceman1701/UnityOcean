@@ -10,7 +10,8 @@ Shader "Ceto/OceanTopSide_Opaque"
 		Tags { "OceanMask"="Ceto_ProjectedGrid_Top" "RenderType"="Ceto_ProjectedGrid_Top" "IgnoreProjector"="True" "Queue"="AlphaTest+50" }
 		LOD 200
 		
-		GrabPass { "Ceto_RefractionGrab" }
+		//GrabPass { "Ceto_RefractionGrab" }
+		//from what I can tell, this pass is never rendered to anyway
 		
 		zwrite on
 		//cull back
@@ -43,9 +44,10 @@ Shader "Ceto/OceanTopSide_Opaque"
 		//#define CETO_DISABLE_CAUSTICS
 		
 		//#define CETO_BRDF_FRESNEL
-		//#define CETO_NICE_BRDF
+		#define CETO_NICE_BRDF
 		#define CETO_OCEAN_TOPSIDE
 		#define CETO_OPAQUE_QUEUE
+		#define NEW_CETO_CUBEMAP_REFLECTIONS
 
 		#include "./OceanShaderHeader.cginc"
 		#include "./OceanDisplacement.cginc"
