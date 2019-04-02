@@ -23,6 +23,8 @@ Shader "Ceto/OceanTopSide_Opaque"
 		//#pragma surface OceanSurfTop OceanBRDF nolightmap fullforwardshadows
 		#pragma vertex OceanVert
 		#pragma target 3.0
+		#pragma require interpolators15
+
 		
 		#pragma multi_compile __ CETO_REFLECTION_ON
 		#pragma multi_compile __ CETO_UNDERWATER_ON
@@ -65,13 +67,14 @@ Shader "Ceto/OceanTopSide_Opaque"
 			zwrite on 
 			ztest lequal
 
-			cull [_CullFace]
+			cull [_CullFace] 
 			
 			CGPROGRAM
 			#pragma vertex OceanVertShadow
 			#pragma fragment OceanFragShadow
 			#pragma target 3.0
-		
+			#pragma require interpolators15
+
 			#pragma multi_compile_shadowcaster
 
 			#pragma multi_compile __ CETO_USE_4_SPECTRUM_GRIDS

@@ -191,7 +191,6 @@ float3 SampleDisplacement(float2 uv, float2 dux, float2 duy)
 */
 half2 SampleSlope(float2 uv, half2 dux, half2 duy)
 {
-
 	half2 slope = half2(0,0);
 
 	#ifdef CETO_DISABLE_NO_DERIVATIVE_SAMPLING
@@ -229,8 +228,7 @@ void SampleSlope(float2 uv, half2 dux, half2 duy, out half2 slope1, out half2 sl
 	slope1 = half2(0, 0);
 	slope2 = half2(0, 0);
 	slope3 = half2(0, 0);
-
-	#ifdef CETO_DISABLE_NO_DERIVATIVE_SAMPLING
+	//#ifdef CETO_DISABLE_NO_DERIVATIVE_SAMPLING
 	#ifndef CETO_DISABLE_SPECTRUM_SLOPE
 
 		uv += Ceto_PosOffset.xz;
@@ -252,7 +250,7 @@ void SampleSlope(float2 uv, half2 dux, half2 duy, out half2 slope1, out half2 sl
 		#endif
 		slope3 = s;
 
-	#endif
+	//#endif
 	#endif
 	
 }
@@ -287,6 +285,27 @@ half2 SampleSlope(float2 uv)
 
 }
 
+half2 SampleLowResSlope(float2 uv)
+{
+
+	half2 slope = half2(0,0);
+
+	#ifndef CETO_DISABLE_SPECTRUM_SLOPE
+
+		uv += Ceto_PosOffset.xz;
+	
+		float4 gridSizes = Ceto_GridSizes * Ceto_GridScale.x;
+		float4 igridSizes = 1.0f / gridSizes;
+	
+		slope += tex2Dlod(Ceto_SlopeMap0, float4(uv * igridSizes.x, 0, 0)).xy;
+		slope += tex2Dlod(Ceto_SlopeMap0, float4(uv * igridSizes.y, 0, 0)).zw;
+
+	#endif
+	
+	return slope;
+
+}
+
 /*
 * Sample the four grid slope maps.
 * The uv is the world xz position.
@@ -299,7 +318,6 @@ void SampleSlope(float2 uv, out half2 slope1, out half2 slope2, out half2 slope3
 	slope1 = half2(0, 0);
 	slope2 = half2(0, 0);
 	slope3 = half2(0, 0);
-
 	#ifndef CETO_DISABLE_SPECTRUM_SLOPE
 
 		uv += Ceto_PosOffset.xz;
@@ -480,7 +498,6 @@ half3 OceanNormal(float4 uv, float4 st, float3 worldPos)
 */
 void OceanNormalAndFoam(float4 uv, float4 st, float3 worldPos, out half3 norm, out half3 unmaskedNorm, out fixed4 foam)
 {
-
 	float4 oceanPos = OceanPos(uv);
 
 	#ifndef CETO_DISABLE_NO_DERIVATIVE_SAMPLING
@@ -526,6 +543,18 @@ void OceanNormalAndFoam(float4 uv, float4 st, float3 worldPos, out half3 norm, o
 	foam.z = ofoam.y;
 }
 
+
+void SampleSmoothedNormal(float2 uv, out half3 norm1, out half3 norm2, out half3 norm3) {
+	float2 dux = ddx(uv);
+	float2 duy = ddy(uv);
+	half2 slope1, slope2, slope3;
+	SampleSlope(uv, dux * Ceto_SlopeSmoothing, duy *  Ceto_SlopeSmoothing, slope1, slope2, slope3);
+
+	norm1 = SlopeToWorldNormal(slope1);
+	norm2 = SlopeToWorldNormal(slope2);
+	norm3 = SlopeToWorldNormal(slope3);
+}
+
 /*
 * Find the ocean normal and foam for the screen uv.
 * The uv is in screen space in 0-1 range.
@@ -537,16 +566,19 @@ void OceanNormalAndFoam(float4 uv, float4 st, float3 worldPos, out half3 norm1, 
 	float4 oceanPos = OceanPos(uv);
 	
 	#ifndef CETO_DISABLE_NO_DERIVATIVE_SAMPLING
+		/*
 	   	half2 slope1, slope2, slope3;
 		SampleSlope(oceanPos.xz, slope1, slope2, slope3);
 		
 		norm1 = SlopeToWorldNormal(slope1);
 	   	norm2 = SlopeToWorldNormal(slope2);
 	   	norm3 = SlopeToWorldNormal(slope3);
-	   	
+	   	*/
+		SampleSmoothedNormal(oceanPos.xz, norm1, norm2, norm3);
 	   	foam = fixed4(0,0,0,0);
 	   	foam.x = SampleFoam(oceanPos.xz);
 	#else
+	
 		float2 dux = ddx(oceanPos.xz);
 		float2 duy = ddy(oceanPos.xz);
 	   	half2 slope1, slope2, slope3;
@@ -555,7 +587,7 @@ void OceanNormalAndFoam(float4 uv, float4 st, float3 worldPos, out half3 norm1, 
 		norm1 = SlopeToWorldNormal(slope1);
 	   	norm2 = SlopeToWorldNormal(slope2);
 	   	norm3 = SlopeToWorldNormal(slope3);
-	   	
+	
 	   	foam = fixed4(0,0,0,0);
 	   	foam.x = SampleFoam(oceanPos.xz, dux * Ceto_FoamSmoothing, duy * Ceto_FoamSmoothing);
    	#endif

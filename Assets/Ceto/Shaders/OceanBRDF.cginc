@@ -70,7 +70,7 @@ fixed3 ReflectionColor(half3 N, half2 reflectUV)
 }
 
 fixed3 CubeReflectionColor(half3 reflectionVector) {
-	return texCUBE(_NewCeto_DirectionSkyMap, reflectionVector);
+	return texCUBE(_NewCeto_DirectionSkyMap, -reflectionVector) * Ceto_ReflectionTint;
 }
 
 half Lambda(half cosTheta, half sigma) 
@@ -163,6 +163,8 @@ inline fixed4 OceanBRDFLight(SurfaceOutputOcean s, half3 viewDir, UnityLight lig
 		fixed3 SpecNoDiffuse = s.Albedo + light.color * spec;
 
 		c.rgb = SpecNoDiffuse * a + SpecAndDiffuse * (1.0 - a);
+		//c.rgb = s.Albedo + light.color * SpecNoDiffuse * a;
+
 	#else
 		c.rgb = s.Albedo * light.color * diff + light.color * spec;
 	#endif
@@ -179,7 +181,7 @@ inline fixed4 OceanBRDFLight(SurfaceOutputOcean s, half3 viewDir, UnityLight lig
 	c.rgb = s.Albedo * light.color * diff + light.color * spec;
 
 #endif
-
+	//c.rgb = s.DNormal;
 	return c;
 
 }
@@ -202,7 +204,7 @@ inline fixed4 LightingOceanBRDF(SurfaceOutputOcean s, half3 viewDir, UnityGI gi)
 
 	c.a = s.Alpha;
 
-	//c.rgb = lerp(c.rgb, s.Albedo, s.LightMask);
+	c.rgb = lerp(c.rgb, s.Albedo, s.LightMask);
 
 	return c;
 }

@@ -27,7 +27,7 @@ namespace Ceto
         /// will be based off. Here I am just using the wind speed
         /// but it could be whatever you like.
         /// </summary>
-        [Range(0.0f, 30.0f)]
+        [Range(0.0f, 500.0f)]
         public float windSpeed = 10.0f;
 
         /// <summary>
@@ -219,6 +219,8 @@ namespace Ceto
             readonly Vector2 WindDir;
 
             readonly float length2, dampedLength2;
+            private readonly float ALPHA = 8.1f / (10 * 10 * 10);
+            private readonly float BETA = 0.74f;
 
             /// <summary>
             /// You will need to pass in any settings your spectrum is based of and the wind direction.
@@ -243,29 +245,45 @@ namespace Ceto
             /// <summary>
             /// Return the spectrum value for kx, kz here.
             /// </summary>
-            public float Spectrum(float kx, float kz)
+            public float Spectrum(float kx, float ky)
             {
                 //Rotate the spectrum based on the wind direction.
-                float u = kx * WindDir.x - kz * WindDir.y;
-                float v = kx * WindDir.y + kz * WindDir.x;
+                //float u = kx * WindDir.x - kz * WindDir.y;
+                //float v = kx * WindDir.y + kz * WindDir.x;
+
+                //kx = u;
+                //kz = v;
+
+                //float k_length = Mathf.Sqrt(kx * kx + kz * kz);
+                //if (k_length < 0.000001f) return 0.0f;
+
+                //float k_length2 = k_length * k_length;
+                //float k_length4 = k_length2 * k_length2;
+
+                //kx /= k_length;
+                //kz /= k_length;
+
+                //float k_dot_w = kx * 1.0f + kz * 0.0f;
+                //float k_dot_w2 = k_dot_w * k_dot_w * k_dot_w * k_dot_w * k_dot_w * k_dot_w;
+
+                //return AMP * Mathf.Exp(-1.0f / (k_length2 * length2)) / k_length4 * k_dot_w2 * Mathf.Exp(-k_length2 * dampedLength2);
+                float u = kx * WindDir.x - ky * WindDir.y;
+                float v = kx * WindDir.y + ky * WindDir.x;
 
                 kx = u;
-                kz = v;
+                ky = v;
+                float f = Mathf.Sqrt(kx * kx + ky * ky);
+                float omega = 2 * Mathf.PI * f;
+                float omega0 = GRAVITY / WindSpeed;
+                float omega5 = Mathf.Pow(omega, 5);
 
-                float k_length = Mathf.Sqrt(kx * kx + kz * kz);
-                if (k_length < 0.000001f) return 0.0f;
+                float omegaDiff = Mathf.Pow((omega0 / omega), 4);
 
-                float k_length2 = k_length * k_length;
-                float k_length4 = k_length2 * k_length2;
+                float exp = Mathf.Exp(-BETA * omegaDiff);
 
-                kx /= k_length;
-                kz /= k_length;
+                float scaler = (ALPHA * GRAVITY * GRAVITY) / omega5;
 
-                float k_dot_w = kx * 1.0f + kz * 0.0f;
-                float k_dot_w2 = k_dot_w * k_dot_w * k_dot_w * k_dot_w * k_dot_w * k_dot_w;
-
-                return AMP * Mathf.Exp(-1.0f / (k_length2 * length2)) / k_length4 * k_dot_w2 * Mathf.Exp(-k_length2 * dampedLength2);
-
+                return scaler * exp;
             }
         }
 

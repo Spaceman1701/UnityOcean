@@ -72,7 +72,7 @@ namespace Ceto
         /// This is just based from observation of the 
         /// heights when wind speed and scale are at there highest.
         /// </summary>
-        public const float MAX_SPECTRUM_WAVE_HEIGHT = 40.0f;
+        public const float MAX_SPECTRUM_WAVE_HEIGHT = 400.0f;
 
 		/// <summary>
 		/// The max wave height from the overlays.
@@ -160,7 +160,9 @@ namespace Ceto
         /// If a underwater component is added this is the inscatter color.
         /// </summary>
 		public Color defaultOceanColor = new Color32(0, 19, 30, 255);
-		
+
+        public Color skyReflectionTint = new Color(1.0f, 1.0f, 1.0f);
+        public float skyReflectionIntensity = 1.0f;
 		/// <summary>
 		/// The wind direction.
 		/// </summary>
@@ -214,6 +216,15 @@ namespace Ceto
         /// Adds the detail to the foam from the overlays and spectrum.
         /// </summary>
         public FoamTexture foamTexture1;
+
+        //Summary:
+        //  distance at which detailed normals end
+        [Tooltip("Distance at which detailed normals fade out. Expressed as fraction of view distance. Helps with specular aliasing.")]
+        [Range(0, 1)]
+        public float lodDistance;
+
+        [Tooltip("Color of the ocean based on the current depth of light refraction. Alpha represents opaqueness.")]
+        public ShaderGradient refractionColor;
 
         /// <summary>
         /// The shader used to render the overlays.
@@ -467,6 +478,7 @@ namespace Ceto
 
 			try
 			{
+                refractionColor.UpdateDataIfChanged();
 
                 WindDirVector = CalculateWindDirVector();
 
@@ -495,8 +507,9 @@ namespace Ceto
                 Shader.SetGlobalColor("Ceto_FoamTint", foamTint * foamIntensity);
                 Shader.SetGlobalVector("Ceto_SunDir", SunDir());
 				Shader.SetGlobalVector("Ceto_SunColor", SunColor());
-            
-				Vector4 foamParam0 = new Vector4();
+                Shader.SetGlobalVector("Ceto_ReflectionTint", skyReflectionTint * skyReflectionIntensity);
+
+                Vector4 foamParam0 = new Vector4();
 				foamParam0.x = (foamTexture0.scale.x != 0.0f) ? 1.0f / foamTexture0.scale.x : 1.0f;
 				foamParam0.y = (foamTexture0.scale.y != 0.0f) ? 1.0f / foamTexture0.scale.y : 1.0f;
                 foamParam0.z = foamTexture0.scrollSpeed * OceanTime.Now;
@@ -513,6 +526,10 @@ namespace Ceto
 
 				Shader.SetGlobalTexture("Ceto_FoamTexture1", ((foamTexture1.tex != null) ? foamTexture1.tex : Texture2D.whiteTexture));
 				Shader.SetGlobalVector("Ceto_FoamTextureScale1", foamParam1);
+
+                Shader.SetGlobalFloat("Ceto_LOD_Distance", lodDistance);
+
+                Shader.SetGlobalTexture("Ceto_Refraction_Gradient", refractionColor.Texture);
 
                 //Rest each data element so they are updated this frame.
                 var e = m_cameraData.GetEnumerator();

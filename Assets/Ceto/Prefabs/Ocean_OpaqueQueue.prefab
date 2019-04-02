@@ -61,6 +61,8 @@ MonoBehaviour:
   foamBlendMode: 0
   defaultSkyColor: {r: 0.3764706, g: 0.5764706, b: 0.8235294, a: 1}
   defaultOceanColor: {r: 0, g: 0.07450981, b: 0.11764706, a: 1}
+  skyReflectionTint: {r: 255, g: 255, b: 255, a: 1}
+  skyReflectionIntensity: 1
   windDir: 0
   specularRoughness: 0.2
   specularIntensity: 0.2
@@ -121,6 +123,7 @@ MonoBehaviour:
   waveSpeed: 1
   gridScale: 0.5
   waveSmoothing: 2
+  slopeSmoothing: 1
   initSlopeSdr: {fileID: 4800000, guid: cf937d5dcb108d244908f01f11d670b1, type: 3}
   initDisplacementSdr: {fileID: 4800000, guid: 619a4a17807fe654cac30df008eeb65c, type: 3}
   initJacobianSdr: {fileID: 4800000, guid: 6d67df12791768640a7a90ec8f26000c, type: 3}

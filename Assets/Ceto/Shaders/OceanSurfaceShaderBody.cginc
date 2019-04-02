@@ -17,6 +17,8 @@ struct Input
 	float4 screenUV;
 	float4 grabUV;
 	float4 texUV;
+	float heightDisplacement;
+	half2 slope; //use vertex interpolation to smooth low-resolution slope
 };
 
 void OceanVert(inout appdata_ceto v, out Input OUT) 
@@ -53,8 +55,15 @@ void OceanVert(inout appdata_ceto v, out Input OUT)
 
 	OUT.screenUV = screenUV;
 	OUT.grabUV = grabUV;
-	
-} 
+	OUT.heightDisplacement = displacement.y;
+	OUT.slope = SampleLowResSlope(OceanPos(uv).xz);
+}
+
+half3 ComputeSpecularNormalLOD(half3 norm3, half3 norm2, float depth) {
+	float linearDepth = Linear01Depth(depth);
+	float adjustedDepth = min(linearDepth / Ceto_LOD_Distance, 1.0);
+	return lerp(norm3, norm2, adjustedDepth); 
+}
 
 void OceanSurfTop(Input IN, inout SurfaceOutputOcean o) 
 {
@@ -62,6 +71,10 @@ void OceanSurfTop(Input IN, inout SurfaceOutputOcean o)
 	float4 uv = IN.texUV;
 	float3 worldPos = IN.wPos.xyz;
 	float depth = IN.wPos.w;
+
+	if (depth == 0) {
+		depth = 1;
+	}
 
 	float4 screenUV;
 	screenUV.xy = IN.screenUV.xy / IN.screenUV.w;
@@ -76,7 +89,6 @@ void OceanSurfTop(Input IN, inout SurfaceOutputOcean o)
 	
 	half3 view = normalize(_WorldSpaceCameraPos-worldPos);
 	float dist = length(_WorldSpaceCameraPos-worldPos);
-
 	#ifdef CETO_USE_4_SPECTRUM_GRIDS
 
 		//If 4 grids are being used use 3 normals where...
@@ -107,16 +119,20 @@ void OceanSurfTop(Input IN, inout SurfaceOutputOcean o)
 	#ifdef NEW_CETO_CUBEMAP_REFLECTIONS
 		half3 reflectVector = reflect(view, norm2);
 		fixed3 sky = CubeReflectionColor(reflectVector); 
+		//sky += ReflectionColor(norm2, screenUV.xy);
 	#else
 		fixed3 sky = ReflectionColor(norm2, screenUV.xy);
 	#endif
+
+	norm1 = SlopeToWorldNormal(IN.slope);
+
 	float4 disortionUV = DisortScreenUV(norm2, screenUV, depth, dist, view);
 
 	float3 worldDepthPos = WorldDepthPos(disortionUV.xy);
 
 	fixed3 caustics = CausticsFromAbove(disortionUV.xy, unmaskedNorm, worldPos, worldDepthPos, dist);
 	
-	fixed3 sea = OceanColorFromAbove(disortionUV, worldPos, depth, caustics);
+	fixed3 sea = OceanColorFromAbove(disortionUV, worldPos, depth, caustics, IN.heightDisplacement);
 
 	sea += SubSurfaceScatter(view, norm1, worldPos.y);
 	
@@ -134,10 +150,12 @@ void OceanSurfTop(Input IN, inout SurfaceOutputOcean o)
 
 	float edgeFade = EdgeFade(screenUV.xy, view, worldPos, worldDepthPos);
 	col = ApplyEdgeFade(col, screenUV.zw, edgeFade, o.Alpha, o.LightMask);
-
+	half3 normLOD = ComputeSpecularNormalLOD(norm3, norm2, depth);
+	//col.rg = (SampleLowResSlope(OceanPos(uv).xz) + IN.slope) / 2;
+	//col.b = 0;
 	o.Albedo = col;
-	o.Normal = TangentSpaceNormal(norm3);
-	o.DNormal = norm3;
+	o.Normal = TangentSpaceNormal(normLOD);
+	o.DNormal = SlopeToWorldNormal(IN.slope);
 	o.Fresnel = fresnel;
 	o.Foam = foamAmount;
 
@@ -184,6 +202,7 @@ void OceanSurfUnder(Input IN, inout SurfaceOutputOcean o)
 	col += sky * (1.0-fresnel);
 	
 	col = AddFoamColor(foamAmount, col);
+
 
 	o.Albedo = col;
 	o.Normal = TangentSpaceNormal(norm);

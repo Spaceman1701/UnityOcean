@@ -48,7 +48,7 @@ namespace Ceto
 		public const float MAX_WAVE_AGE = 1.0f;
 		public const float MAX_WAVE_SPEED = 10.0f;
 		public const float MIN_GRID_SCALE = 0.1f;
-		public const float MAX_GRID_SCALE = 1.0f;
+		public const float MAX_GRID_SCALE = 10.0f;
 		public const float MAX_WAVE_SMOOTHING = 6.0f;
 		public const float MIN_WAVE_SMOOTHING = 1.0f;
 		public const float MAX_SLOPE_SMOOTHING = 6.0f;

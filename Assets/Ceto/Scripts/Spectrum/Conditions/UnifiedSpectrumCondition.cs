@@ -44,6 +44,18 @@ namespace Ceto
 
         }
 
+        private Vector4 AutoGridSize(float largest)
+        {
+            float ratio = 0.381966f; //the golden ratio;
+            Vector4 gridSizes = new Vector4();
+            gridSizes.x = largest;
+            for (int i = 1; i < 4; i++)
+            {
+                gridSizes[i] = gridSizes[i - 1] * ratio;
+            }
+            return gridSizes;
+        }
+
         public override SpectrumTask GetCreateSpectrumConditionTask()
         {
 

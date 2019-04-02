@@ -303,6 +303,7 @@ fixed3 AboveRefractionColor(float2 grabUV, float3 surfacePos, float depth, fixed
 
 	fixed3 grab = tex2D(Ceto_RefractionGrab, grabUV).rgb * Ceto_AboveRefractionIntensity;
 
+
 	grab += caustics;
 	
 	fixed3 col = grab * Ceto_AbsTint * exp(-Ceto_AbsCof.rgb * depth * Ceto_MaxDepthDist * Ceto_AbsCof.a);
@@ -361,10 +362,11 @@ fixed3 AddBelowInscatter(fixed3 col, float depth)
 /*
 * The ocean color when seen from above the ocean mesh.
 */
-fixed3 OceanColorFromAbove(float4 distortedUV, float3 surfacePos, float surfaceDepth, fixed3 caustics)
+fixed3 OceanColorFromAbove(float4 distortedUV, float3 surfacePos, float surfaceDepth, fixed3 caustics, float heightDisplacement)
 {
 
 	fixed3 col = Ceto_DefaultOceanColor;
+
 
 	#ifdef CETO_UNDERWATER_ON
 		
@@ -374,9 +376,17 @@ fixed3 OceanColorFromAbove(float4 distortedUV, float3 surfacePos, float surfaceD
 		
 		fixed3 refraction = AboveRefractionColor(distortedUV.zw, surfacePos, depthBlend, caustics);
 		
+
+		float normHeight = (1 - heightDisplacement / Ceto_MaxWaveHeight);
+		fixed4 refractColor = tex2D(Ceto_Refraction_Gradient, float2(0.5, normHeight));
+
 		col = AddAboveInscatter(refraction, depthBlend);
 
+		//col = refractColor.rgb;
+
 	#endif
+
+	
 	
 	return col;
 	

@@ -23,7 +23,8 @@ Shader "Ceto/OceanTopSide_Transparent"
 		#pragma surface OceanSurfTop OceanBRDF noforwardadd nolightmap keepalpha
 		#pragma vertex OceanVert
 		#pragma target 3.0
-		
+		#pragma require interpolators15
+
 		#pragma multi_compile __ CETO_REFLECTION_ON
 		#pragma multi_compile __ CETO_UNDERWATER_ON
 		#pragma multi_compile __ CETO_USE_OCEAN_DEPTHS_BUFFER

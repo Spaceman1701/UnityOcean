@@ -58,7 +58,7 @@ namespace Ceto
             NumGrids = condition.Key.NumGrids;
 
             m_rnd = new System.Random(0);
-            m_distibution = SPECTRUM_DISTRIBUTION.LINEAR;
+            m_distibution = SPECTRUM_DISTRIBUTION.GAUSSIAN;
 
             float factor = 2.0f * Mathf.PI * Size;
             InverseGridSizes = new Vector4(factor / GridSizes.x, factor / GridSizes.y, factor / GridSizes.z, factor / GridSizes.w);
@@ -194,7 +194,7 @@ namespace Ceto
             float ampy = WaveAmps.y;
             float ampz = WaveAmps.z;
             float ampw = WaveAmps.w;
-
+            float L = 1;
             for (int y = 0; y < size; y++)
             {
 
@@ -205,11 +205,10 @@ namespace Ceto
                     idx = x + y * size;
                     i = (x >= hsize) ? (x - fsize) : x;
                     j = (y >= hsize) ? (y - fsize) : y;
-
                     if (grids > 0)
                     {
                         phi = RandomNumber() * PI_2;
-                        sample.x = GetSpectrumSample(i, j, dkx, PI_GRID_X, ampx, m_spectrums[0]);
+                        sample.x = GetSpectrumSample(i, j, dkx, PI_GRID_X, ampx, m_spectrums[0]) * L;
                         m_spectrum01[idx].r = sample.x * Mathf.Cos(phi) * sqrt2;
                         m_spectrum01[idx].g = sample.x * Mathf.Sin(phi) * sqrt2;
                     }
@@ -217,7 +216,8 @@ namespace Ceto
                     if (grids > 1)
                     {
                         phi = RandomNumber() * PI_2;
-                        sample.y = GetSpectrumSample(i, j, dky, PI_GRID_SIZE_X, ampy, m_spectrums[1]);
+                        sample.y = GetSpectrumSample(i, j, dky, PI_GRID_SIZE_X, ampy, m_spectrums[1]) * L;
+  
                         m_spectrum01[idx].b = sample.y * Mathf.Cos(phi) * sqrt2;
                         m_spectrum01[idx].a = sample.y * Mathf.Sin(phi) * sqrt2;
                     }
@@ -225,7 +225,8 @@ namespace Ceto
                     if (grids > 2)
                     {
                         phi = RandomNumber() * PI_2;
-                        sample.z = GetSpectrumSample(i, j, dkz, PI_GRID_SIZE_Y, ampz, m_spectrums[2]);
+                        sample.z = GetSpectrumSample(i, j, dkz, PI_GRID_SIZE_Y, ampz, m_spectrums[2]) * L;
+
                         m_spectrum23[idx].r = sample.z * Mathf.Cos(phi) * sqrt2;
                         m_spectrum23[idx].g = sample.z * Mathf.Sin(phi) * sqrt2;
                     }
@@ -233,7 +234,8 @@ namespace Ceto
                     if (grids > 3)
                     {
                         phi = RandomNumber() * PI_2;
-                        sample.w = GetSpectrumSample(i, j, dkw, PI_GRID_SIZE_Z, ampw, m_spectrums[3]);
+                        sample.w = GetSpectrumSample(i, j, dkw, PI_GRID_SIZE_Z, ampw, m_spectrums[3]) * L;
+
                         m_spectrum23[idx].b = sample.w * Mathf.Cos(phi) * sqrt2;
                         m_spectrum23[idx].a = sample.w * Mathf.Sin(phi) * sqrt2;
                     }

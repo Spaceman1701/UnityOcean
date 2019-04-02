@@ -124,6 +124,7 @@ namespace Ceto
             //float alpham = 0.01f * (u_star < WAVE_CM ? 1.0f + Mathf.Log(u_star / WAVE_CM) : 1.0f + 3.0f * Mathf.Log(u_star / WAVE_CM)); // Eq 44
             float Fm = Mathf.Exp(-0.25f * sqr(k / WAVE_KM - 1.0f)); // Eq 41
             float Bh = HALF_ALPHAM_WAVE_CM / c * Fm * Lpm; // Eq 40 (fixed)
+            //TODO: Fix above
 
             //float a0 = LOG_2_4;
             //float ap = 4.0f;
